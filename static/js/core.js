@@ -69,8 +69,8 @@ $(document).ready(function () {
     $("#win-rename-modal input").focus(function () {
         $(this).parent().parent().removeClass("error").removeClass("success");
     }).blur(function () {
-            $(this).parent().parent().addClass($.trim($(this).val()) === '' ? "error" : "success");
-        });
+        $(this).parent().parent().addClass($.trim($(this).val()) === '' ? "error" : "success");
+    });
 
     $("#btn-download").click(function () {
         $.get("download",

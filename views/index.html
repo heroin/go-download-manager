@@ -23,6 +23,7 @@
             <ul id="tab-nav" class="nav nav-tabs">
               <li class="active"><a href="#files" data-toggle="tab">File List</a></li>
               <li><a href="#download" data-toggle="tab">Download</a></li>
+              <li><a href="#batch-download" data-toggle="tab">Batch Download</a></li>
             </ul>
             <div id="tab-content" class="tab-content">
               <div id="files" class="tab-pane fade in active">
@@ -61,6 +62,27 @@
                   <div class="control-group">
                     <div class="controls">
                       <button id="btn-download" type="button" class="btn btn-primary">Download</button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+              <div id="batch-download" class="tab-pane fade">
+                <form class="form-horizontal">
+                  <div class="control-group">
+                    <label class="control-label" for="down-file">Url</label>
+                    <div class="controls">
+                      <textarea id="batch-url" rows="10" class="input-xxlarge"></textarea>
+                    </div>
+                  </div>
+                  <div class="control-group">
+                    <label class="control-label" for="save-path">Path</label>
+                    <div class="controls">
+                      <input type="text" id="batch-save-path" placeholder="Default">
+                    </div>
+                  </div>
+                  <div class="control-group">
+                    <div class="controls">
+                      <button id="btn-batch-download" type="button" class="btn btn-primary">Download</button>
                     </div>
                   </div>
                 </form>
