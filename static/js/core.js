@@ -74,13 +74,27 @@ $(document).ready(function () {
 
     $("#btn-download").click(function () {
         $.get("download",
-            {"url": $("#down-file").val(), "name": $("#save-name").val(), "path": $("#save-path").val()},
+            {"url": $.trim($("#down-file").val()), "name": $.trim($("#save-name").val()), "path": $.trim($("#save-path").val())},
             function (data) {
                 var result = eval("(" + data + ")")
-                console.info(result)
                 if (result.code > 0) {
-                    alert("下载进行中....");
                     load("");
+                } else {
+                    alert("error, code=" + result.code);
+                }
+            }
+        );
+    });
+
+    $("#btn-batch-download").click(function () {
+        $.get("batch/download",
+            {"urls": $.trim($("#batch-url").val()), "path": $.trim($("#batch-save-path").val())},
+            function (data) {
+                var result = eval("(" + data + ")")
+                if (result.code > 0) {
+                    load("");
+                } else {
+                    alert("error, code=" + result.code);
                 }
             }
         );

@@ -8,6 +8,7 @@ import (
 	"runtime"
 	"text/template"
 	"io"
+	"bufio"
 	"io/ioutil"
 	"strings"
 )
@@ -16,7 +17,7 @@ const (
 	DOWNLOAD_PATH = "/www/domain/download.heroin.so"
 	SERVER        = "GO-DOWNLOAD-MANAGER"
 	PORT          = 12323
-	CMD_LINE      = "wget.exe"
+	CMD_LINE      = "wget"
 )
 
 type Context struct {
@@ -72,19 +73,9 @@ func download(out http.ResponseWriter, request *http.Request) {
 	name := request.FormValue("name")
 	path := request.FormValue("path")
 
-	generatePath := func(path string) string {
-		if strings.TrimSpace(path) != "" {
-			if !strings.HasPrefix(path, "/") && strings.Index(path, "../") < 0 {
-				return fmt.Sprintf("%s/%s/", DOWNLOAD_PATH, path)
-			}
-			return DOWNLOAD_PATH
-		}
-		return DOWNLOAD_PATH
-	}
-
 	if strings.TrimSpace(url) != "" {
 		if strings.TrimSpace(name) != "" {
-			if strings.Index(name, "../") < 0 && strings.Index(name, "/") < 0{
+			if strings.Index(name, "../") < 0 && strings.Index(name, "/") < 0 {
 				go Download(url, generatePath(path), name)
 				fmt.Fprintf(out, "{\"result\":\"Success\", \"code\":1}")
 			} else {
@@ -98,6 +89,23 @@ func download(out http.ResponseWriter, request *http.Request) {
 	} else {
 		fmt.Fprintf(out, "{\"result\":\"Error\", \"code\":-1}")
 	}
+}
+
+func batchDownload(out http.ResponseWriter, request *http.Request) {
+	out.Header().Set("Server", SERVER)
+	request.ParseForm()
+	urls := request.FormValue("urls")
+	path := request.FormValue("path")
+	reader := bufio.NewReader(strings.NewReader(urls))
+	for {
+		line, _, err := reader.ReadLine()
+		if err == io.EOF {
+			break
+		}else {
+			go Download(string(line), generatePath(path), "")
+		}
+	}
+	fmt.Fprintf(out, "{\"result\":\"Success\", \"code\":1}")
 }
 
 func remove(out http.ResponseWriter, request *http.Request) {
@@ -131,12 +139,23 @@ func Download(url string, path string, name string) {
 	log.Printf("download over %s \n", url)
 }
 
+func generatePath(path string) string {
+	if strings.TrimSpace(path) != "" {
+		if !strings.HasPrefix(path, "/") && strings.Index(path, "../") < 0 {
+			return fmt.Sprintf("%s/%s/", DOWNLOAD_PATH, path)
+		}
+		return DOWNLOAD_PATH
+	}
+	return DOWNLOAD_PATH
+}
+
 func main() {
 	runtime.GOMAXPROCS(5)
 	http.HandleFunc("/", index)
-	http.HandleFunc("/rm", remove)
 	http.HandleFunc("/list", list)
+	http.HandleFunc("/rm", remove)
 	http.HandleFunc("/download", download)
+	http.HandleFunc("/batch/download", batchDownload)
 	err := http.ListenAndServe(fmt.Sprintf(":%d", PORT), nil)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
