@@ -1,16 +1,16 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os/exec"
 	"runtime"
-	"text/template"
-	"io"
-	"bufio"
-	"io/ioutil"
 	"strings"
+	"text/template"
 )
 
 const (
@@ -42,7 +42,7 @@ func index(out http.ResponseWriter, request *http.Request) {
 		n := len(requestPath)
 		http.ServeFile(out, request, fmt.Sprintf("static/%s", requestPath[1:n]))
 	} else {
-		app := Context {}
+		app := Context{}
 		app.view(out, "index")
 	}
 }
@@ -51,16 +51,27 @@ func list(out http.ResponseWriter, request *http.Request) {
 	out.Header().Set("Server", SERVER)
 	request.ParseForm()
 	path := request.FormValue("path")
-	var data []File
+	var data, f, d []File
 	if strings.HasPrefix(path, "/") && strings.Index(path, "../") < 0 {
 		files, _ := ioutil.ReadDir(fmt.Sprintf("%s%s", DOWNLOAD_PATH, path))
 		for _, i := range files {
-			data = append(data, File {
+			if i.IsDir() {
+				d = append(d, File{
 					Name: i.Name(),
 					Date: i.ModTime().Format("2006-01-02 15:04:05"),
-					Dir: i.IsDir(),
+					Dir:  i.IsDir(),
 				})
+			} else {
+				f = append(f, File{
+					Name: i.Name(),
+					Date: i.ModTime().Format("2006-01-02 15:04:05"),
+					Dir:  i.IsDir(),
+				})
+			}
+
 		}
+		data = append(data, d...)
+		data = append(data, f...)
 	}
 	cursor := template.Must(template.New("text").Parse(`<?xml version="1.0" encoding="UTF-8"?><root>{{if .}}{{range .}}<file><name>{{.Name}}</name><date>{{.Date}}</date><dir>{{.Dir}}</dir></file>{{end}}{{end}}</root>`))
 	cursor.Execute(out, data)
@@ -101,7 +112,7 @@ func batchDownload(out http.ResponseWriter, request *http.Request) {
 		line, _, err := reader.ReadLine()
 		if err == io.EOF {
 			break
-		}else {
+		} else {
 			go Download(string(line), generatePath(path), "")
 		}
 	}
