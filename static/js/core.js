@@ -1,3 +1,4 @@
+var current_path = "";
 $(document).ready(function () {
 
     function getTableElement(element, tag) {
@@ -11,20 +12,34 @@ $(document).ready(function () {
         });
 
         $(".file-remove").click(function () {
-            var name = getTableElement($(this), ".file-name").attr("data-name");
-            console.info(name);
+            var item = getTableElement($(this), ".file-name")
+            type = $.trim(item.attr("item-type"));
+            name = $.trim(item.attr("data-name"));
+            if (type != "" && name != "") {
+                $.get("rm?" + type + "=" + name, {},
+                    function (data) {
+                        var result = eval("(" + data + ")")
+                        if (result.code > 0) {
+                            load(current_path);
+                        } else {
+                            alert("error, code=" + result.code);
+                        }
+                    }
+                );
+            }
         });
 
         $(".load-path").click(function () {
             var name = getTableElement($(this), ".file-name").attr("data-name");
-            load(name);
+            current_path = name;
+            load(current_path);
         });
     }
 
     function make(url, name, date, dir) {
         html = "";
         html += "                    <tr>\n";
-        html += "                      <td class=\"file-name\" data-name=\"" + url + ((url.substring(url.length - 1) != "/" && name != "..") ? "/" : "") + (name != ".." ? name : "") + "\">";
+        html += "                      <td class=\"file-name\"item-type= \"" + (dir ? "dir" : "file") + "\" data-name=\"" + url + ((url.substring(url.length - 1) != "/" && name != "..") ? "/" : "") + (name != ".." ? name : "") + "\">";
         if (dir) {
             html += "<a href=\"javascript:void(0);\" class=\"load-path\">"
         } else {
@@ -78,7 +93,7 @@ $(document).ready(function () {
             function (data) {
                 var result = eval("(" + data + ")")
                 if (result.code > 0) {
-                    load("");
+                    load(current_path);
                 } else {
                     alert("error, code=" + result.code);
                 }
@@ -92,7 +107,7 @@ $(document).ready(function () {
             function (data) {
                 var result = eval("(" + data + ")")
                 if (result.code > 0) {
-                    load("");
+                    load(current_path);
                 } else {
                     alert("error, code=" + result.code);
                 }

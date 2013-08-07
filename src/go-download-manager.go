@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"os/exec"
 	"runtime"
 	"strings"
@@ -122,15 +123,37 @@ func batchDownload(out http.ResponseWriter, request *http.Request) {
 func remove(out http.ResponseWriter, request *http.Request) {
 	out.Header().Set("Server", SERVER)
 	request.ParseForm()
-	fmt.Println(request.Form["file"])
-	fmt.Println(request.FormValue("file"))
-	fmt.Println(request.Form["dir"])
-	fmt.Println(ioutil.ReadDir("./"))
-	files, _ := ioutil.ReadDir("./")
-	for i := range files {
-		fmt.Println(files[i].Name())
+	files := request.Form["file"]
+	dirs := request.Form["dir"]
+	for _, v := range files {
+		name := fmt.Sprintf("%s%s", DOWNLOAD_PATH, v)
+		if file_info, err_file := os.Stat(name); err_file == nil {
+			if !file_info.IsDir() {
+				if err_rm := os.Remove(name); err_rm == nil {
+					fmt.Printf("delete success file: %s \n", name)
+				} else {
+					fmt.Printf("delete error file: %s, %s \n", name, err_file)
+				}
+			}
+		} else {
+			fmt.Printf("file info error: %s \n", name)
+		}
 	}
-	fmt.Fprintf(out, "rm\r\n")
+	for _, v := range dirs {
+		name := fmt.Sprintf("%s%s", DOWNLOAD_PATH, v)
+		if dir_info, err_file := os.Stat(name); err_file == nil {
+			if dir_info.IsDir() {
+				if err_dir := os.RemoveAll(name); err_dir == nil {
+					fmt.Printf("delete success dir: %s \n", name)
+				} else {
+					fmt.Printf("delete error dir: %s, %s \n", name, err_dir)
+				}
+			}
+		} else {
+			fmt.Printf("dir info error: %s \n", name)
+		}
+	}
+	fmt.Fprintf(out, "{\"result\":\"Success\", \"code\":1}")
 }
 
 func Download(url string, path string, name string) {
