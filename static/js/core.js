@@ -138,4 +138,10 @@ $(document).ready(function () {
             );
         }
     });
+
+    key("f5", function() {
+        load(current_path);
+        event.returnValue = false;
+        return false;
+    });
 });
