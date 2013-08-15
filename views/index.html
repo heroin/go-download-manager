@@ -3,14 +3,14 @@
   <head>
     <title>Download Manager</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <link href="http://lib.sinaapp.com/js/bootstrap/2.3.1/css/bootstrap.min.css" rel="stylesheet" type="text/css" media="all" />
-    <link href="http://lib.sinaapp.com/js/bootstrap/2.3.1/css/bootstrap-responsive.min.css" rel="stylesheet" type="text/css" media="all" />
+    <link href="http://lib.sinaapp.com/js/bootstrap/2.3.2/css/bootstrap.min.css" rel="stylesheet" type="text/css" media="all" />
+    <link href="http://lib.sinaapp.com/js/bootstrap/2.3.2/css/bootstrap-responsive.min.css" rel="stylesheet" type="text/css" media="all" />
     <link href="css/style.css" rel="stylesheet" type="text/css" media="all" />
     <!--[if lt IE 9]>
       <script type="text/javascript" src="js/html5shiv.js"></script>
     </[endif]-->
-    <script type="text/javascript" src="http://lib.sinaapp.com/js/jquery/2.0.2/jquery-2.0.2.min.js"></script>
-    <script type="text/javascript" src="http://lib.sinaapp.com/js/bootstrap/2.3.1/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="http://lib.sinaapp.com/js/jquery/2.0.3/jquery-2.0.3.min.js"></script>
+    <script type="text/javascript" src="http://lib.sinaapp.com/js/bootstrap/2.3.2/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="js/core.js"></script>
   </head>
 
@@ -102,12 +102,13 @@
         <div class="control-group">
           <label class="control-label" for="module-name">Name</label>
           <div class="controls">
+            <input type="hidden" id="path-name" />
             <input type="text" id="module-name" class="input-xlarge" placeholder="Modify the name" />
           </div>
         </div>
       </div>
       <div class="modal-footer">
-        <a href="javascript:void(0);" class="btn btn-primary" id="btn-add-module">Submit</a>
+        <a href="javascript:void(0);" class="btn btn-primary" id="btn-rename-module">Submit</a>
         <a href="#" class="btn" data-dismiss="modal">Close</a>
       </div>
     </div>

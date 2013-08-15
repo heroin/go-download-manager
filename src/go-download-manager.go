@@ -17,7 +17,7 @@ import (
 const (
 	DOWNLOAD_PATH = "/www/domain/download.heroin.so"
 	SERVER        = "GO-DOWNLOAD-MANAGER"
-	PORT          = 12323
+	PORT          = 12321
 	CMD_LINE      = "wget"
 )
 
@@ -69,7 +69,6 @@ func list(out http.ResponseWriter, request *http.Request) {
 					Dir:  i.IsDir(),
 				})
 			}
-
 		}
 		data = append(data, d...)
 		data = append(data, f...)
@@ -156,6 +155,28 @@ func remove(out http.ResponseWriter, request *http.Request) {
 	fmt.Fprintf(out, "{\"result\":\"Success\", \"code\":1}")
 }
 
+func move(out http.ResponseWriter, request *http.Request) {
+	out.Header().Set("Server", SERVER)
+	request.ParseForm()
+	old := request.FormValue("old")
+	new := request.FormValue("new")
+	if strings.Index(old, "/") == 0 && strings.Index(new, "/") == 0 {
+		if _, err_file := os.Stat(fmt.Sprintf("%s%s", DOWNLOAD_PATH, old)); err_file == nil {
+			if err_rename := os.Rename(fmt.Sprintf("%s%s", DOWNLOAD_PATH, old), fmt.Sprintf("%s%s", DOWNLOAD_PATH, new)); err_rename == nil {
+				fmt.Fprintf(out, "{\"result\":\"Success\", \"code\":1}")
+				fmt.Printf("move success old: %s, new: %s \n", old, new)
+			} else {
+				fmt.Printf("move error, old: %s, new: %s, %s \n", old, new, err_rename)
+				fmt.Fprintf(out, fmt.Sprintf("{\"result\":\"%s\", \"code\":-1}", err_rename))
+			}
+		} else {
+			fmt.Fprintf(out, fmt.Sprintf("{\"result\":\"%s\", \"code\":-1}", err_file))
+		}
+	} else {
+		fmt.Fprintf(out, "{\"result\":\"path error\", \"code\":-1}")
+	}
+}
+
 func Download(url string, path string, name string) {
 	runtime.Gosched()
 	log.Printf("download start %s \n", url)
@@ -188,6 +209,7 @@ func main() {
 	http.HandleFunc("/", index)
 	http.HandleFunc("/list", list)
 	http.HandleFunc("/rm", remove)
+	http.HandleFunc("/mv", move)
 	http.HandleFunc("/download", download)
 	http.HandleFunc("/batch/download", batchDownload)
 	err := http.ListenAndServe(fmt.Sprintf(":%d", PORT), nil)
